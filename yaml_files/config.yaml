@@ -1,0 +1,51 @@
+training_pipeline_config:
+  pipeline_name: BackOrder_predictor
+  artifact_dir: artifact
+
+data_ingestion_config:
+  dataset_download_url: https://github.com/ashishshukla23sep/Backorder_prediction/blob/main/dataset.zip
+  raw_data_dir: raw_data
+  zip_download_dir: zip_data
+  ingested_dir: ingested_data
+  ingested_train_dir: train
+  ingested_test_dir: test 
+
+
+
+
+data_validation_config:
+  schema_dir: yaml_files
+  schema_file_name: schema.yaml
+  report_file_name: report.json
+  report_page_file_name: report.html
+
+data_transformation_config:
+  add_bedroom_per_room: true
+  transformed_dir: transformed_data
+  transformed_train_dir: train
+  transformed_train_dir1: train1
+  transformed_test_dir: test
+  transformed_test_dir1: test1
+  preprocessing_dir: preprocessed
+  preprocessed_object_file_name: preprocessed.pkl
+  
+model_trainer_config:
+  trained_model_dir: trained_model
+  model_file_name: model.pkl
+  model_file_name1: model1.pkl
+  base_accuracy: 0.6
+  model_config_dir: yaml_files
+  model_config_file_name: model.yaml
+
+
+model_evaluation_config:
+  model_evaluation_file_name: model_evaluation.yaml
+  
+
+model_pusher_config:
+  model_export_dir: saved_models
+
+
+data_base_config:
+  username : ashishshukla23sep
+  password : mm1332647

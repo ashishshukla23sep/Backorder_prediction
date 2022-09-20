@@ -1,0 +1,16 @@
+numpy
+Flask
+gunicorn
+sklearn
+pandas
+PyYAML
+evidently
+dill
+matplotlib
+python-box
+zipfile
+urllib
+dvc
+cryptography
+pymongo
+-e .
