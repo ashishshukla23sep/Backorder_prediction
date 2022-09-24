@@ -39,6 +39,7 @@ BackOrder_predictor/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+Missing_value.ipynb
 
 # Unit test / coverage reports
 htmlcov/
