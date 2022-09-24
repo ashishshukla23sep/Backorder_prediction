@@ -3,14 +3,14 @@ import importlib
 from pyexpat import model
 import numpy as np
 import yaml
-from housing.exception import HousingException
+from backorder.exception import HousingException
 import os
 import sys
 
 from collections import namedtuple
 from typing import List
-from housing.logger import logging
-from sklearn.metrics import r2_score,mean_squared_error
+from backorder.logger import logging
+from sklearn.metrics import precision_score,f1_score,confusion_matrix,roc_auc_score
 GRID_SEARCH_KEY = 'grid_search'
 MODULE_KEY = 'module'
 CLASS_KEY = 'class'
@@ -35,16 +35,12 @@ BestModel = namedtuple("BestModel", ["model_serial_number",
                                      "best_score", ])
 
 MetricInfoArtifact = namedtuple("MetricInfoArtifact",
-                                ["model_name", "model_object", "train_rmse", "test_rmse", "train_accuracy",
-                                 "test_accuracy", "model_accuracy", "index_number"])
+                                ["model_name", "model_object", "train_f1score", "test_f1score", "index_number"])
 
 
 
 def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.6)->MetricInfoArtifact:
-    pass
-
-
-def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.6) -> MetricInfoArtifact:
+    
     """
     Description:
     This function compare multiple regression model return best model
@@ -77,13 +73,11 @@ def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.n
             y_train_pred = model.predict(X_train)
             y_test_pred = model.predict(X_test)
 
-            #Calculating r squared score on training and testing dataset
-            train_acc = r2_score(y_train, y_train_pred)
-            test_acc = r2_score(y_test, y_test_pred)
+            #Calculating f1_score score on training and testing dataset
+            train_acc = f1_score(y_train, y_train_pred)
+            test_acc = f1_score(y_test, y_test_pred)
             
-            #Calculating mean squared error on training and testing dataset
-            train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
-            test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+            confusion_matrix = confusion_matrix(y_test, y_test_pred)
 
             # Calculating harmonic mean of train_accuracy and test_accuracy
             model_accuracy = (2 * (train_acc * test_acc)) / (train_acc + test_acc)
@@ -96,8 +90,8 @@ def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.n
 
             logging.info(f"{'>>'*30} Loss {'<<'*30}")
             logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].") 
-            logging.info(f"Train root mean squared error: [{train_rmse}].")
-            logging.info(f"Test root mean squared error: [{test_rmse}].")
+            logging.info(f"Train confusion_Matrix error: \n [{confusion_matrix}]\n.")
+            
 
 
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
@@ -106,7 +100,7 @@ def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.n
                 base_accuracy = model_accuracy
                 metric_info_artifact = MetricInfoArtifact(model_name=model_name,
                                                         model_object=model,
-                                                        train_rmse=train_rmse,
+                                                        train_rmse=No,
                                                         test_rmse=test_rmse,
                                                         train_accuracy=train_acc,
                                                         test_accuracy=test_acc,

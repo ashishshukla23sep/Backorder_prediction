@@ -6,14 +6,23 @@ grid_search:
     verbose: 2
 model_selection:
   module_0:
-    class: LinearRegression
-    module: sklearn.linear_model
+    class: XGBClassifier
+    module: xgboost
     params:
-      fit_intercept: true
+      nthread: 4
+      objective: binary:hinge
+      learning_rate: 0.05
+      max_depth : 6
+      min_child_weight : 11
+      silent : 
     search_param_grid:
-      fit_intercept:
-      - true
-      - false
+      learning_rate: 
+      - 0
+      - 0.5
+      n_estimators :
+      -5
+      -50
+      -100
   module_1:
     class: RandomForestRegressor
     module: sklearn.ensemble
