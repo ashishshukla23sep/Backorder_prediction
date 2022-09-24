@@ -125,8 +125,7 @@ class DataTransformation:
             logging.info(f"Obtaining training and test file path.")
             train_file_path = self.data_ingestion_artifact.train_file_path
             test_file_path = self.data_ingestion_artifact.test_file_path
-            print('Train file path : ',train_file_path)
-            print('Test file path : ',test_file_path)
+            
 
             schema_file_path = self.data_validation_artifact.schema_file_path
             
@@ -134,7 +133,7 @@ class DataTransformation:
             train_df = load_data(file_path=train_file_path, schema_file_path=schema_file_path)
             test_df = load_data(file_path=test_file_path, schema_file_path=schema_file_path)
 
-            print('train_df null value \n',train_df.isnull().sum(),'\n',test_df.isnull().sum())
+            
 
             schema = read_yaml_file(file_path=schema_file_path)
 
@@ -149,13 +148,13 @@ class DataTransformation:
 
 
 
-            print('Preprocessed image Shape',preprocess_data_train.shape)
+            
             
 
             train_df = pd.DataFrame(preprocess_data_train,columns=schema[REPLACE_99_NAN]+schema[NUMERICAL_COLUMN_KEY]+schema[CATEGORICAL_COLUMN_KEY])
             test_df = pd.DataFrame(preprocess_data_test,columns=test_df.columns)
 
-            print('train_df null value \n',train_df.isnull().sum(),'\n',test_df.isnull().sum())
+            
 
             logging.info(f"Splitting input and target feature from training and testing dataframe.")
             input_feature_train_df = train_df.drop(columns=target_column_name)

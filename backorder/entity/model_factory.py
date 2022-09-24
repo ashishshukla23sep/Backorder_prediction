@@ -3,7 +3,7 @@ import importlib
 from pyexpat import model
 import numpy as np
 import yaml
-from backorder.exception import HousingException
+from backorder.exception import BackOrderException 
 import os
 import sys
 
@@ -35,11 +35,11 @@ BestModel = namedtuple("BestModel", ["model_serial_number",
                                      "best_score", ])
 
 MetricInfoArtifact = namedtuple("MetricInfoArtifact",
-                                ["model_name", "model_object", "train_f1score", "test_f1score", "index_number"])
+                                ["model_name", "model_object", "train_f1score", "test_f1score", "model_f1score","index_number"])
 
 
 
-def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.6)->MetricInfoArtifact:
+def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_f1score:float=0.6)->MetricInfoArtifact:
     
     """
     Description:
@@ -55,9 +55,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
     return
     It retured a named tuple
     
-    MetricInfoArtifact = namedtuple("MetricInfo",
-                                ["model_name", "model_object", "train_rmse", "test_rmse", "train_accuracy",
-                                 "test_accuracy", "model_accuracy", "index_number"])
+    MetricInfoArtifact
 
     """
     try:
@@ -74,19 +72,19 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             y_test_pred = model.predict(X_test)
 
             #Calculating f1_score score on training and testing dataset
-            train_acc = f1_score(y_train, y_train_pred)
-            test_acc = f1_score(y_test, y_test_pred)
+            train_f1 = f1_score(y_train, y_train_pred)
+            test_f1 = f1_score(y_test, y_test_pred)
             
             confusion_matrix = confusion_matrix(y_test, y_test_pred)
 
-            # Calculating harmonic mean of train_accuracy and test_accuracy
-            model_accuracy = (2 * (train_acc * test_acc)) / (train_acc + test_acc)
-            diff_test_train_acc = abs(test_acc - train_acc)
+            # Calculating harmonic mean of train_f1score and test_f1score
+            model_f1_score = (2 * (train_f1 * test_f1)) / (train_f1 + test_f1)
+            diff_test_train_acc = abs(test_f1 - train_f1)
             
             #logging all important metric
             logging.info(f"{'>>'*30} Score {'<<'*30}")
             logging.info(f"Train Score\t\t Test Score\t\t Average Score")
-            logging.info(f"{train_acc}\t\t {test_acc}\t\t{model_accuracy}")
+            logging.info(f"{train_f1}\t\t {test_f1}\t\t{model_f1_score}")
 
             logging.info(f"{'>>'*30} Loss {'<<'*30}")
             logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].") 
@@ -94,17 +92,15 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             
 
 
-            #if model accuracy is greater than base accuracy and train and test score is within certain thershold
+            #if model f1score is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
-            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.05:
-                base_accuracy = model_accuracy
+            if model_f1_score >= base_f1score and diff_test_train_acc < 0.05:
+                base_f1score = model_f1_score
                 metric_info_artifact = MetricInfoArtifact(model_name=model_name,
                                                         model_object=model,
-                                                        train_rmse=No,
-                                                        test_rmse=test_rmse,
-                                                        train_accuracy=train_acc,
-                                                        test_accuracy=test_acc,
-                                                        model_accuracy=model_accuracy,
+                                                        train_f1score=train_f1,
+                                                        test_f1score=test_f1,
+                                                        model_f1_score=model_f1_score,
                                                         index_number=index_number)
 
                 logging.info(f"Acceptable model found {metric_info_artifact}. ")
@@ -113,7 +109,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             logging.info(f"No model found with higher accuracy than base accuracy")
         return metric_info_artifact
     except Exception as e:
-        raise HousingException(e, sys) from e
+        raise BackOrderException(e, sys) from e
 
 
 def get_sample_model_config_yaml_file(export_dir: str):
@@ -149,7 +145,7 @@ def get_sample_model_config_yaml_file(export_dir: str):
             yaml.dump(model_config, file)
         return export_file_path
     except Exception as e:
-        raise HousingException(e, sys)
+        raise BackOrderException(e, sys)
 
 
 class ModelFactory:
@@ -167,7 +163,7 @@ class ModelFactory:
             self.grid_searched_best_model_list = None
 
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     @staticmethod
     def update_property_of_class(instance_ref:object, property_data: dict):
@@ -180,7 +176,7 @@ class ModelFactory:
                 setattr(instance_ref, key, value)
             return instance_ref
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     @staticmethod
     def read_params(config_path: str) -> dict:
@@ -189,7 +185,7 @@ class ModelFactory:
                 config:dict = yaml.safe_load(yaml_file)
             return config
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     @staticmethod
     def class_for_name(module_name:str, class_name:str):
@@ -201,7 +197,7 @@ class ModelFactory:
             class_ref = getattr(module, class_name)
             return class_ref
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def execute_grid_search_operation(self, initialized_model: InitializedModelDetail, input_feature,
                                       output_feature) -> GridSearchedBestModel:
@@ -242,7 +238,7 @@ class ModelFactory:
             
             return grid_searched_best_model
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def get_initialized_model_list(self) -> List[InitializedModelDetail]:
         """
@@ -278,7 +274,7 @@ class ModelFactory:
             self.initialized_model_list = initialized_model_list
             return self.initialized_model_list
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def initiate_best_parameter_search_for_initialized_model(self, initialized_model: InitializedModelDetail,
                                                              input_feature,
@@ -298,7 +294,7 @@ class ModelFactory:
                                                       input_feature=input_feature,
                                                       output_feature=output_feature)
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def initiate_best_parameter_search_for_initialized_models(self,
                                                               initialized_model_list: List[InitializedModelDetail],
@@ -316,7 +312,7 @@ class ModelFactory:
                 self.grid_searched_best_model_list.append(grid_searched_best_model)
             return self.grid_searched_best_model_list
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     @staticmethod
     def get_model_detail(model_details: List[InitializedModelDetail],
@@ -329,28 +325,28 @@ class ModelFactory:
                 if model_data.model_serial_number == model_serial_number:
                     return model_data
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     @staticmethod
     def get_best_model_from_grid_searched_best_model_list(grid_searched_best_model_list: List[GridSearchedBestModel],
-                                                          base_accuracy=0.6
+                                                          base_f1score=0.6
                                                           ) -> BestModel:
         try:
             best_model = None
             for grid_searched_best_model in grid_searched_best_model_list:
-                if base_accuracy < grid_searched_best_model.best_score:
+                if base_f1score < grid_searched_best_model.best_score:
                     logging.info(f"Acceptable model found:{grid_searched_best_model}")
-                    base_accuracy = grid_searched_best_model.best_score
+                    base_f1score = grid_searched_best_model.best_score
 
                     best_model = grid_searched_best_model
             if not best_model:
-                raise Exception(f"None of Model has base accuracy: {base_accuracy}")
+                raise Exception(f"None of Model has base accuracy: {base_f1score}")
             logging.info(f"Best model: {best_model}")
             return best_model
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
-    def get_best_model(self, X, y,base_accuracy=0.6) -> BestModel:
+    def get_best_model(self, X, y,base_f1score=0.6) -> BestModel:
         try:
             logging.info("Started Initializing model from config file")
             initialized_model_list = self.get_initialized_model_list()
@@ -361,6 +357,6 @@ class ModelFactory:
                 output_feature=y
             )
             return ModelFactory.get_best_model_from_grid_searched_best_model_list(grid_searched_best_model_list,
-                                                                                  base_accuracy=base_accuracy)
+                                                                                  base_f1score=base_f1score)
         except Exception as e:
-            raise HousingException(e, sys)
+            raise BackOrderException(e, sys)

@@ -1,4 +1,5 @@
 from inspect import trace
+from backorder.constant import BUCKET_NAME, DATASET_FOLDER
 from backorder.entity.config_entity import DataIngestionConfig
 import sys,os
 from backorder.exception import BackOrderException
@@ -7,10 +8,13 @@ from backorder.entity.artifact_entity import DataIngestionArtifact
 from zipfile import ZipFile
 import numpy as np
 from six.moves import urllib
+import boto3
 from urllib.request import urlopen
 from io import BytesIO
 import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
+from backorder.database.mangodb import MangoDbconnection
+from backorder.cloud.cloud import CloudKey
 
 class DataIngestion:
 
@@ -23,11 +27,11 @@ class DataIngestion:
             raise BackOrderException(e,sys)
     
 
-    def download_housing_data(self,) -> str:
+    def download_backorder_data(self,) -> str:
         try:
             #extraction remote url to download dataset
             download_url = self.data_ingestion_config.dataset_download_url
-
+            access_key ,secret_key = CloudKey().get_cloud_key()
             #folder location to download file
             zip_download_dir = self.data_ingestion_config.zip_download_dir
             
@@ -37,10 +41,11 @@ class DataIngestion:
 
             zip_file_path = os.path.join(zip_download_dir, backorder_file_name)
 
-            logging.info(f"Downloading file from :[{download_url}] into :[{zip_file_path}]")
-            urllib.request.urlretrieve(download_url, zip_file_path)
+            logging.info(f"Downloading file from :s3 into :[{zip_file_path}]")
+            
+            boto3.client ('s3',aws_access_key_id=access_key,aws_secret_access_key=secret_key).download_file(BUCKET_NAME,DATASET_FOLDER,zip_file_path)
             logging.info(f"File :[{zip_file_path}] has been downloaded successfully.")
-            return r'C:\Users\\1672040\Desktop\\project\\back_order_prediction\\dataset.zip'
+            return zip_file_path
 
         except Exception as e:
             raise BackOrderException(e,sys) from e
@@ -79,7 +84,7 @@ class DataIngestion:
 
     def initiate_data_ingestion(self)-> DataIngestionArtifact:
         try:
-            zip_file_path =  self.download_housing_data()
+            zip_file_path =  self.download_backorder_data()
             
             return self.extract_zip_file(zip_file_path=zip_file_path)
         except Exception as e:

@@ -21,8 +21,12 @@ SCHEMA_FILE_PATH=os.path.join(ROOT_DIR,CONFIG_DIR,SCHEMA_FILE_NAME)
 
 CURRENT_TIME_STAMP = get_current_time_stamp()
 
+#AWS
+DATABASE_NAME='DATA'
+COLLOCTION_NAME = 'aws'
 
-
+BUCKET_NAME = 'backorderprediction'
+DATASET_FOLDER = 'data/dataset.zip'
 
 # Training pipeline related variable
 TRAINING_PIPELINE_CONFIG_KEY = "training_pipeline_config"

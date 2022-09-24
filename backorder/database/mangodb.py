@@ -16,8 +16,8 @@ class MangoDbconnection:
                 config_path= CREDENTIAL_FILE_PATH
                 self.config = read_yaml_file(file_path=config_path)
                 
-                self.username = Decrypt(self.config['mongodb']['username'].encode()).get_decrypted_massage()
-                self.password = Decrypt(self.config['mongodb']['password'].encode()).get_decrypted_massage()
+                self.username = Decrypt(self.config['mongodb']['user_name']).get_decrypted_massage()
+                self.password = Decrypt(self.config['mongodb']['password']).get_decrypted_massage()
 
             else:
                 self.username = username
@@ -108,3 +108,11 @@ class MangoDbconnection:
             return len(records)
         except Exception as e:
             raise BackOrderException(e,sys) from e
+
+    def get_records_from_collection(self,database_name,collection_name):
+
+        client=self.get_database_client_object()
+        db_ = client[database_name]
+        coll_ = db_[collection_name]
+    
+        return coll_.find()
