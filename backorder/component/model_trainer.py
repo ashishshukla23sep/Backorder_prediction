@@ -1,17 +1,17 @@
 
-from backorder.exception import HousingException
+from backorder.exception import BackOrderException
 import sys
-from housing.logger import logging
+from backorder.logger import logging
 from typing import List
 from backorder.entity.artifact_entity import DataTransformationArtifact, ModelTrainerArtifact
 from backorder.entity.config_entity import ModelTrainerConfig
 from backorder.util.util import load_numpy_array_data,save_object,load_object
 from backorder.entity.model_factory import MetricInfoArtifact, ModelFactory,GridSearchedBestModel
-from backorder.entity.model_factory import evaluate_regression_model
+from backorder.entity.model_factory import evaluate_classification_model
 
 
 
-class HousingEstimatorModel:
+class BackOrderPredictorModel:
     def __init__(self, preprocessing_object, trained_model_object):
         """
         TrainedModel constructor
@@ -47,7 +47,7 @@ class ModelTrainer:
             self.model_trainer_config = model_trainer_config
             self.data_transformation_artifact = data_transformation_artifact
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def initiate_model_trainer(self)->ModelTrainerArtifact:
         try:
@@ -83,7 +83,7 @@ class ModelTrainer:
             
             model_list = [model.best_model for model in grid_searched_best_model_list ]
             logging.info(f"Evaluation all trained model on training and testing dataset both")
-            metric_info:MetricInfoArtifact = evaluate_regression_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
+            metric_info:MetricInfoArtifact = evaluate_classification_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
 
             logging.info(f"Best found model on both training and testing dataset.")
             
@@ -92,25 +92,22 @@ class ModelTrainer:
 
 
             trained_model_file_path=self.model_trainer_config.trained_model_file_path
-            housing_model = HousingEstimatorModel(preprocessing_object=preprocessing_obj,trained_model_object=model_object)
+            back_order_model = BackOrderPredictorModel(preprocessing_object=preprocessing_obj,trained_model_object=model_object)
             logging.info(f"Saving model at path: {trained_model_file_path}")
-            save_object(file_path=trained_model_file_path,obj=housing_model)
+            save_object(file_path=trained_model_file_path,obj=back_order_model)
 
 
             model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
             trained_model_file_path=trained_model_file_path,
-            train_rmse=metric_info.train_rmse,
-            test_rmse=metric_info.test_rmse,
-            train_accuracy=metric_info.train_accuracy,
-            test_accuracy=metric_info.test_accuracy,
-            model_accuracy=metric_info.model_accuracy
-            
+            train_f1_score=metric_info.train_f1score,
+            test_f1_score=metric_info.test_f1score,
+            model_f1_score=metric_info.model_f1_score
             )
 
             logging.info(f"Model Trainer Artifact: {model_trainer_artifact}")
             return model_trainer_artifact
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise BackOrderException(e, sys) from e
 
     def __del__(self):
         logging.info(f"{'>>' * 30}Model trainer log completed.{'<<' * 30} ")
