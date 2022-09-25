@@ -20,20 +20,16 @@ data_validation_config:
   report_page_file_name: report.html
 
 data_transformation_config:
-  add_bedroom_per_room: true
   transformed_dir: transformed_data
   transformed_train_dir: train
-  transformed_train_dir1: train1
   transformed_test_dir: test
-  transformed_test_dir1: test1
   preprocessing_dir: preprocessed
   preprocessed_object_file_name: preprocessed.pkl
   
 model_trainer_config:
   trained_model_dir: trained_model
   model_file_name: model.pkl
-  model_file_name1: model1.pkl
-  base_accuracy: 0.6
+  base_f1score: 0.6
   model_config_dir: yaml_files
   model_config_file_name: model.yaml
 

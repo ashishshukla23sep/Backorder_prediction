@@ -13,4 +13,5 @@ urllib
 dvc
 cryptography
 pymongo
+xgboost
 -e .
