@@ -8,6 +8,7 @@ from backorder.entity.config_entity import ModelTrainerConfig
 from backorder.util.util import load_numpy_array_data,save_object,load_object
 from backorder.entity.model_factory import MetricInfoArtifact, ModelFactory,GridSearchedBestModel
 from backorder.entity.model_factory import evaluate_classification_model
+from backorder.cloud.cloud import CloudKey
 
 
 
@@ -70,11 +71,11 @@ class ModelTrainer:
             model_factory = ModelFactory(model_config_path=model_config_file_path)
             
             
-            base_accuracy = self.model_trainer_config.base_accuracy
-            logging.info(f"Expected accuracy: {base_accuracy}")
+            base_f1score= self.model_trainer_config.base_f1score
+            logging.info(f"Expected accuracy: {base_f1score}")
 
             logging.info(f"Initiating operation model selecttion")
-            best_model = model_factory.get_best_model(X=x_train,y=y_train,base_accuracy=base_accuracy)
+            best_model = model_factory.get_best_model(X=x_train,y=y_train,base_f1score=base_f1score)
             
             logging.info(f"Best model found on training dataset: {best_model}")
             
@@ -92,13 +93,17 @@ class ModelTrainer:
 
 
             trained_model_file_path=self.model_trainer_config.trained_model_file_path
+            trained_s3_model_path = self.model_trainer_config.trained_s3_file_path
+
             back_order_model = BackOrderPredictorModel(preprocessing_object=preprocessing_obj,trained_model_object=model_object)
             logging.info(f"Saving model at path: {trained_model_file_path}")
-            save_object(file_path=trained_model_file_path,obj=back_order_model)
+            #save_object(file_path=trained_model_file_path,obj=back_order_model)
+            CloudKey().upload_file(file=back_order_model,key=trained_s3_model_path)
 
 
             model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
             trained_model_file_path=trained_model_file_path,
+            trained_s3_model_file_path=trained_s3_model_path,
             train_f1_score=metric_info.train_f1score,
             test_f1_score=metric_info.test_f1score,
             model_f1_score=metric_info.model_f1_score
