@@ -2,6 +2,7 @@ from backorder.component.data_ingestion import DataIngestion
 from backorder.component.data_validation import DataValidation
 from backorder.component.model_trainer import ModelTrainer
 from backorder.component.data_transformation import DataTransformation
+from backorder.component.model_evaluation import ModelEvaluation
 from backorder.config.configuration import Configuartion
 import os,sys
 
@@ -16,3 +17,10 @@ data_tranformation = DataTransformation(data_ingestion_artifact=data_ingestion_a
 data_tranformation_artifact = data_tranformation.initiate_data_transformation()
 model_trainer = ModelTrainer(model_trainer_config=config.get_model_trainer_config(),data_transformation_artifact=data_tranformation_artifact)
 model_trainer_artifact = model_trainer.initiate_model_trainer()
+
+model_eval = ModelEvaluation(
+                model_evaluation_config=config.get_model_evaluation_config(),
+                data_ingestion_artifact=data_ingestion_artifact,
+                data_validation_artifact=data_validation_artifact,
+                model_trainer_artifact=model_trainer_artifact)
+model_eval_artifact = model_eval.initiate_model_evaluation()

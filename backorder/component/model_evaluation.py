@@ -8,7 +8,7 @@ import os
 import sys
 from backorder.util.util import write_yaml_file, read_yaml_file, load_object,load_data
 from backorder.entity.model_factory import evaluate_classification_model
-from backorder.cloud.cloud import download_file
+from backorder.cloud.cloud import CloudKey
 
 
 
@@ -87,7 +87,7 @@ class ModelEvaluation:
             trained_model_file_path = self.model_trainer_artifact.trained_s3_model_file_path
             #trained_model_object = load_object(file_path=trained_model_file_path)
 
-            trained_model_object = download_file(key=trained_model_file_path)
+            trained_model_object = CloudKey().download_file(key=trained_model_file_path)
             
 
             train_file_path = self.data_ingestion_artifact.train_file_path

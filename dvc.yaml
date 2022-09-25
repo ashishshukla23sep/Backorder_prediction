@@ -1,3 +1,40 @@
 stages:
   data_ingestion:
-    cmd
+    cmd: python backorder/component/ata_ingestion.py
+    deps:
+     - backorder/component/data_ingestion.py
+     - yaml_files/config.yaml
+     outs:
+     - BackOrder_predictor/artifact/data_ingestion
+  data_validation:
+    cmd: python backorder/pipeline/stage_data_validation.py
+    deps:
+    - backorder/pipeline/stage_data_validation.py
+    - backorder/component/data_ingestion.py
+    - yaml_files/config.yaml
+    outs:
+    - BackOrder_predictor/artifact/data_transformation
+  data_transforamtion:
+    cmd: python backorder/pipeline/stage_data_transformation.py
+    deps:
+    - backorder/pipeline/stage_data_transformation.py
+    - backorder/pipeline/stage_data_validation.py
+    - yaml_files/config.yaml
+  model_trainer:
+    cmd: python backorder/pipeline/stage_model_trainer.py
+    deps:
+    - backorder/pipeline/stage_model_trainer.py
+    - backorder/pipeline/stage_data_transformation.py
+    - back- yaml_files/config.yaml
+  model_evalution:
+    cmd: python backorder/pipeline/stage_model_evaluation.py
+    deps:
+    - backorder/pipeline/stage_model_evaluation.py
+    - backorder/pipeline/stage_model_trainer.py
+    - backorder/pipeline/stage_data_transformation.py
+    - back- yaml_files/config.yaml
+
+
+
+
+

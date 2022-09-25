@@ -23,25 +23,22 @@ model_selection:
       - 5
       - 50
       - 100
-  module_1:
-    class: RandomForestRegressor
-    module: sklearn.ensemble
-    params:
-      min_samples_leaf: 3
-      bootstrap: True
-      min_samples_split: 2
-      n_estimators: 200
-    search_param_grid:
-      min_samples_leaf:
-      - 1
-      - 2
-      min_samples_split:
-      - 2
-      - 5
-      - 7
-      n_estimators:
-      - 200
-      - 400
-      - 800
-      - 1000
+  # module_1:
+  #   class: RandomForestRegressor
+  #   module: sklearn.ensemble
+  #   params:
+  #     min_samples_leaf: 3
+  #     bootstrap: True
+  #     min_samples_split: 2
+  #     n_estimators: 200
+  #   search_param_grid:
+  #     min_samples_leaf:
+  #     - 1
+  #     - 2
+  #     min_samples_split:
+  #     - 2
+  #     n_estimators:
+  #     - 300
+  #     - 400
+      
       
